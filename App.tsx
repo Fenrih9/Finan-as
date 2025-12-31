@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Screen } from './types';
 import { HomeScreen } from './screens/Home';
 import { NewTransactionScreen } from './screens/NewTransaction';
@@ -16,6 +16,13 @@ const App: React.FC = () => {
   const [editingTransaction, setEditingTransaction] = useState<any>(null);
   const { isAuthenticated, isLoading, user } = useData();
   const { wallpaper: themeWallpaper, setWallpaper } = useTheme();
+
+  // Redirect to HOME when user logs in
+  useEffect(() => {
+    if (isAuthenticated) {
+      setCurrentScreen(Screen.HOME);
+    }
+  }, [isAuthenticated]);
 
   // Use persisted wallpaper if theme wallpaper is not manually set in current session
   const effectiveWallpaper = themeWallpaper || user?.wallpaper;

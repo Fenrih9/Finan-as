@@ -163,7 +163,11 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = async () => {
+    console.log('DataContext: logging out...');
     await supabase.auth.signOut();
+    setIsAuthenticated(false);
+    setUser(null);
+    console.log('DataContext: signOut/state reset complete');
   };
 
   const updateUser = async (u: Partial<UserProfile & { wallpaper: string | null }>) => {

@@ -278,7 +278,10 @@ export const ProfileScreen: React.FC<ProfileProps> = ({ onBack }) => {
             </button>
 
             <button
-              onClick={logout}
+              onClick={() => {
+                console.log('Profile: Sair button clicked');
+                logout();
+              }}
               className="w-full flex items-center justify-between p-4 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors group last:border-0"
             >
               <div className="flex items-center gap-4">

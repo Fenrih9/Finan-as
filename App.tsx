@@ -13,6 +13,7 @@ import { useTheme } from './ThemeContext';
 
 const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<Screen>(Screen.HOME);
+  const [hasRedirected, setHasRedirected] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<any>(null);
   const { isAuthenticated, isLoading, user } = useData();
   const { wallpaper: themeWallpaper, setWallpaper } = useTheme();
@@ -20,9 +21,14 @@ const App: React.FC = () => {
   // Redirect to HOME when user logs in
   useEffect(() => {
     if (isAuthenticated) {
-      setCurrentScreen(Screen.HOME);
+      if (!hasRedirected) {
+        setCurrentScreen(Screen.HOME);
+        setHasRedirected(true);
+      }
+    } else {
+      setHasRedirected(false);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, hasRedirected]);
 
   // Use persisted wallpaper if theme wallpaper is not manually set in current session
   const effectiveWallpaper = themeWallpaper || user?.wallpaper;

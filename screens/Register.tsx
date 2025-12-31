@@ -17,6 +17,7 @@ export const RegisterScreen: React.FC<RegisterProps> = ({ onNavigate }) => {
   const [saveInfo, setSaveInfo] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,13 +102,22 @@ export const RegisterScreen: React.FC<RegisterProps> = ({ onNavigate }) => {
           <div className="flex items-center rounded-xl bg-white dark:bg-surface-dark border border-slate-200 dark:border-slate-700/50 p-3 shadow-sm focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
             <span className="material-symbols-outlined text-slate-400 mr-2">lock</span>
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               placeholder="Crie uma senha forte"
               className="w-full bg-transparent border-none p-0 text-slate-900 dark:text-white placeholder-slate-400 focus:ring-0"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="flex items-center justify-center p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+            >
+              <span className="material-symbols-outlined text-[20px]">
+                {showPassword ? 'visibility_off' : 'visibility'}
+              </span>
+            </button>
           </div>
         </div>
 

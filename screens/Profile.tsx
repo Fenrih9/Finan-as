@@ -4,6 +4,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { useTheme } from '../ThemeContext';
 import { useData } from '../DataContext';
 import { Footer } from '../components/Footer';
+import { supabase } from '../supabaseClient';
 
 interface ProfileProps {
   onBack: () => void;
@@ -26,6 +27,10 @@ export const ProfileScreen: React.FC<ProfileProps> = ({ onBack }) => {
   const [newCatName, setNewCatName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('category');
   const [newName, setNewName] = useState(user?.name || '');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isPasswordModalOpen, setPasswordModalOpen] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [uploadType, setUploadType] = useState<'avatar' | 'wallpaper'>('avatar');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -47,8 +52,28 @@ export const ProfileScreen: React.FC<ProfileProps> = ({ onBack }) => {
 
   const handleNameUpdate = async () => {
     if (newName.trim()) {
+      setIsUpdating(true);
       await updateUser({ name: newName });
+      setIsUpdating(false);
       setNameModalOpen(false);
+    }
+  };
+
+  const handlePasswordUpdate = async () => {
+    if (newPassword && newPassword === confirmPassword) {
+      setIsUpdating(true);
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      setIsUpdating(false);
+      if (error) {
+        alert('Erro ao atualizar senha: ' + error.message);
+      } else {
+        alert('Senha atualizada com sucesso!');
+        setPasswordModalOpen(false);
+        setNewPassword('');
+        setConfirmPassword('');
+      }
+    } else {
+      alert('As senhas não coincidem!');
     }
   };
 
@@ -220,7 +245,10 @@ export const ProfileScreen: React.FC<ProfileProps> = ({ onBack }) => {
               <span className="material-symbols-outlined text-slate-400">chevron_right</span>
             </button>
 
-            <button className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group border-b border-slate-100 dark:border-slate-700/50 last:border-0">
+            <button
+              onClick={() => setPasswordModalOpen(true)}
+              className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group border-b border-slate-100 dark:border-slate-700/50 last:border-0"
+            >
               <div className="flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary group-hover:bg-secondary group-hover:text-white transition-all">
                   <span className="material-symbols-outlined">lock</span>
@@ -350,6 +378,101 @@ export const ProfileScreen: React.FC<ProfileProps> = ({ onBack }) => {
                     )}
                   </button>
                 ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Name Update Modal */}
+      {isNameModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-sm bg-white dark:bg-[#1a2632] rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-5 duration-300">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Dados Pessoais</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Nome Completo</label>
+                <div className="mt-1 flex items-center border border-slate-200 dark:border-slate-700/50 rounded-xl bg-slate-50 dark:bg-black/5 p-3 focus-within:ring-2 focus-within:ring-primary transition-all">
+                  <span className="material-symbols-outlined text-slate-400 mr-2">person</span>
+                  <input
+                    type="text"
+                    className="bg-transparent border-none p-0 text-sm w-full focus:ring-0 text-slate-900 dark:text-white"
+                    placeholder="Seu nome"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setNameModalOpen(false)}
+                  className="flex-1 py-3 px-4 rounded-xl font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleNameUpdate}
+                  disabled={isUpdating || !newName.trim()}
+                  className="flex-1 py-3 px-4 rounded-xl font-bold bg-primary text-white shadow-lg shadow-primary/30 active:scale-95 transition-all disabled:opacity-50"
+                >
+                  {isUpdating ? 'Salvando...' : 'Salvar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Password Update Modal */}
+      {isPasswordModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-sm bg-white dark:bg-[#1a2632] rounded-t-3xl sm:rounded-2xl p-6 shadow-2xl animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-5 duration-300">
+            <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Segurança</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Nova Senha</label>
+                <div className="mt-1 flex items-center border border-slate-200 dark:border-slate-700/50 rounded-xl bg-slate-50 dark:bg-black/5 p-3 focus-within:ring-2 focus-within:ring-primary transition-all">
+                  <span className="material-symbols-outlined text-slate-400 mr-2">lock</span>
+                  <input
+                    type="password"
+                    className="bg-transparent border-none p-0 text-sm w-full focus:ring-0 text-slate-900 dark:text-white"
+                    placeholder="******"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Confirmar Senha</label>
+                <div className="mt-1 flex items-center border border-slate-200 dark:border-slate-700/50 rounded-xl bg-slate-50 dark:bg-black/5 p-3 focus-within:ring-2 focus-within:ring-primary transition-all">
+                  <span className="material-symbols-outlined text-slate-400 mr-2">lock_reset</span>
+                  <input
+                    type="password"
+                    className="bg-transparent border-none p-0 text-sm w-full focus:ring-0 text-slate-900 dark:text-white"
+                    placeholder="******"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => {
+                    setPasswordModalOpen(false);
+                    setNewPassword('');
+                    setConfirmPassword('');
+                  }}
+                  className="flex-1 py-3 px-4 rounded-xl font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handlePasswordUpdate}
+                  disabled={isUpdating || !newPassword || newPassword !== confirmPassword}
+                  className="flex-1 py-3 px-4 rounded-xl font-bold bg-primary text-white shadow-lg shadow-primary/30 active:scale-95 transition-all disabled:opacity-50"
+                >
+                  {isUpdating ? 'Alterando...' : 'Alterar Senha'}
+                </button>
               </div>
             </div>
           </div>

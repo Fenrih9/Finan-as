@@ -102,7 +102,8 @@ export const HomeScreen: React.FC<HomeProps> = ({ onNavigate }) => {
               </span>
             </button>
           </div>
-          <h1 className="font-display text-4xl font-bold tracking-tight mt-1">
+          <h1 className={`font-display text-4xl font-bold tracking-tight mt-1 ${balance >= 0 ? 'text-[#38bdf8]' : 'text-expense'
+            }`}>
             {isPrivacyMode ? (
               <span className="tracking-widest">R$ ••••••</span>
             ) : (
@@ -110,9 +111,11 @@ export const HomeScreen: React.FC<HomeProps> = ({ onNavigate }) => {
             )}
           </h1>
           <div className="mt-4 flex items-center gap-2 rounded-lg bg-white/10 px-3 py-1.5 w-fit backdrop-blur-sm">
-            <span className="material-symbols-outlined text-income text-sm">trending_up</span>
-            <span className="text-xs font-semibold text-income">
-              {isPrivacyMode ? '•••••' : '+ 0%'}
+            <span className={`material-symbols-outlined text-sm ${balance >= 0 ? 'text-[#38bdf8]' : 'text-expense'}`}>
+              {balance >= 0 ? 'trending_up' : 'trending_down'}
+            </span>
+            <span className={`text-xs font-semibold ${balance >= 0 ? 'text-[#38bdf8]' : 'text-expense'}`}>
+              {isPrivacyMode ? '•••••' : (balance >= 0 ? '+ 0%' : '- 0%')}
             </span>
             <span className="text-xs text-blue-100/70">este mês</span>
           </div>

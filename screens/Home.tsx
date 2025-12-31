@@ -38,6 +38,14 @@ export const HomeScreen: React.FC<HomeProps> = ({ onNavigate }) => {
     });
   }, [transactions]);
 
+  const totalGrowth = useMemo(() => {
+    if (transactions.length === 0) return 0;
+    const sorted = [...transactions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const initialIncome = sorted.find(t => t.type === 'income')?.amount || 0;
+    if (initialIncome === 0) return 0;
+    return ((balance / initialIncome) - 1) * 100;
+  }, [transactions, balance]);
+
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
@@ -110,14 +118,41 @@ export const HomeScreen: React.FC<HomeProps> = ({ onNavigate }) => {
               formatMoney(balance)
             )}
           </h1>
-          <div className="mt-4 flex items-center gap-2 rounded-lg bg-white/10 px-3 py-1.5 w-fit backdrop-blur-sm">
-            <span className={`material-symbols-outlined text-sm ${balance >= 0 ? 'text-[#38bdf8]' : 'text-expense'}`}>
-              {balance >= 0 ? 'trending_up' : 'trending_down'}
-            </span>
-            <span className={`text-xs font-semibold ${balance >= 0 ? 'text-[#38bdf8]' : 'text-expense'}`}>
-              {isPrivacyMode ? '•••••' : (balance >= 0 ? '+ 0%' : '- 0%')}
-            </span>
-            <span className="text-xs text-blue-100/70">este mês</span>
+
+          <div className="flex items-end justify-between mt-4">
+            <div className="flex items-center gap-2 rounded-lg bg-white/10 px-3 py-1.5 w-fit backdrop-blur-sm">
+              <span className={`material-symbols-outlined text-sm ${balance >= 0 ? 'text-[#38bdf8]' : 'text-expense'}`}>
+                {balance >= 0 ? 'trending_up' : 'trending_down'}
+              </span>
+              <span className={`text-xs font-semibold ${balance >= 0 ? 'text-[#38bdf8]' : 'text-expense'}`}>
+                {isPrivacyMode ? '•••••' : (balance >= 0 ? '+ 0%' : '- 0%')}
+              </span>
+              <span className="text-xs text-blue-100/70">este mês</span>
+            </div>
+
+            <div className="flex flex-col items-end gap-1">
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-primary/10 backdrop-blur-sm border border-primary/20">
+                <span className="material-symbols-outlined text-[10px] text-primary">history</span>
+                <span className="text-[10px] font-bold text-primary uppercase tracking-tighter">Total</span>
+                <span className={`text-[10px] font-black ${totalGrowth >= 0 ? 'text-[#38bdf8]' : 'text-expense'}`}>
+                  {isPrivacyMode ? '••%' : `${totalGrowth >= 0 ? '+' : ''}${totalGrowth.toFixed(1)}%`}
+                </span>
+              </div>
+              <div className="h-6 w-16">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData}>
+                    <Area
+                      type="monotone"
+                      dataKey="value"
+                      stroke={totalGrowth >= 0 ? '#38bdf8' : '#ff6b6b'}
+                      strokeWidth={1.5}
+                      fill={totalGrowth >= 0 ? '#38bdf8' : '#ff6b6b'}
+                      fillOpacity={0.1}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </div>
         </div>
       </section>

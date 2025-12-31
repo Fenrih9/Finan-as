@@ -306,6 +306,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     .reduce((acc, t) => acc + t.amount, 0);
 
   const balance = 56925.05; // Patrimonio Total conforme solicitado pelo usuário
+  console.log('DataProvider: balance =', balance);
 
   return (
     <DataContext.Provider value={{

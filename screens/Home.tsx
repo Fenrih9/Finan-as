@@ -13,6 +13,7 @@ interface HomeProps {
 export const HomeScreen: React.FC<HomeProps> = ({ onNavigate }) => {
   const { isPrivacyMode, togglePrivacyMode } = useTheme();
   const { user, balance, income, expense, notifications, transactions } = useData();
+  console.log('HomeScreen: balance =', balance);
 
 
 

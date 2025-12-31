@@ -26,6 +26,7 @@ export const ProfileScreen: React.FC<ProfileProps> = ({ onBack }) => {
   const [newCatName, setNewCatName] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('category');
   const [newName, setNewName] = useState(user?.name || '');
+  const [uploadType, setUploadType] = useState<'avatar' | 'wallpaper'>('avatar');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const CATEGORY_ICONS = [
@@ -57,15 +58,22 @@ export const ProfileScreen: React.FC<ProfileProps> = ({ onBack }) => {
       const reader = new FileReader();
       reader.onloadend = async () => {
         const result = reader.result as string;
-        setWallpaper(result);
-        await updateUser({ wallpaper: result });
+        if (uploadType === 'wallpaper') {
+          setWallpaper(result);
+          await updateUser({ wallpaper: result });
+        } else {
+          await updateUser({ avatar: result });
+        }
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const triggerFileUpload = () => {
-    fileInputRef.current?.click();
+  const triggerFileUpload = (type: 'avatar' | 'wallpaper') => {
+    setUploadType(type);
+    setTimeout(() => {
+      fileInputRef.current?.click();
+    }, 0);
   };
 
   return (
@@ -278,11 +286,17 @@ export const ProfileScreen: React.FC<ProfileProps> = ({ onBack }) => {
             <div className="mb-6">
               <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Foto de Perfil</h3>
               <div className="flex gap-4">
-                <button className="flex-1 bg-primary text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-primary/30 active:scale-95 transition-transform flex items-center justify-center gap-2">
+                <button
+                  onClick={() => triggerFileUpload('avatar')}
+                  className="flex-1 bg-primary text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-primary/30 active:scale-95 transition-transform flex items-center justify-center gap-2"
+                >
                   <span className="material-symbols-outlined">upload</span>
                   Alterar Foto
                 </button>
-                <button className="aspect-square bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-500 hover:text-danger hover:bg-danger/10 transition-colors">
+                <button
+                  onClick={() => updateUser({ avatar: null })}
+                  className="aspect-square bg-slate-100 dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-500 hover:text-danger hover:bg-danger/10 transition-colors"
+                >
                   <span className="material-symbols-outlined">delete</span>
                 </button>
               </div>
@@ -310,7 +324,7 @@ export const ProfileScreen: React.FC<ProfileProps> = ({ onBack }) => {
               <div className="grid grid-cols-3 gap-2">
                 {/* Upload Button */}
                 <button
-                  onClick={triggerFileUpload}
+                  onClick={() => triggerFileUpload('wallpaper')}
                   className="aspect-[3/4] rounded-lg border-2 border-dashed border-slate-300 dark:border-slate-600 flex flex-col items-center justify-center gap-1 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors group"
                 >
                   <div className="p-2 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300 group-hover:text-primary transition-colors">
